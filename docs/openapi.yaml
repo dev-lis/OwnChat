@@ -4,6 +4,8 @@ info:
   version: 1.0.0
   description: |
     Versioned API v1 for OwnChat behind FastAPI API Gateway.
+    Current runtime architecture is service-oriented modular monolith
+    with module boundaries prepared for extraction to microservices.
     Base REST prefix: /api/v1
 servers:
   - url: https://api.example.com
