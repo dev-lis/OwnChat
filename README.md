@@ -1,4 +1,4 @@
-# Chat Backend (API Gateway)
+# OwnChat (API Gateway)
 
 ## Run
 

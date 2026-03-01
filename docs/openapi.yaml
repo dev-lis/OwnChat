@@ -1,9 +1,9 @@
 openapi: 3.0.3
 info:
-  title: Chat Backend API
+  title: OwnChat API
   version: 1.0.0
   description: |
-    Versioned API v1 for chat backend behind FastAPI API Gateway.
+    Versioned API v1 for OwnChat behind FastAPI API Gateway.
     Base REST prefix: /api/v1
 servers:
   - url: https://api.example.com

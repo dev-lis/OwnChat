@@ -15,7 +15,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 OPENAPI_YAML_PATH = BASE_DIR / "docs" / "openapi.yaml"
 
 app = FastAPI(
-    title="Chat Backend API",
+    title="OwnChat API",
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
