@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Literal
@@ -47,6 +48,11 @@ class RefreshRequest(BaseModel):
     refresh_token: str
 
 
+class TempRegisterRequest(BaseModel):
+    login: str = Field(min_length=3, max_length=64)
+    password: str = Field(min_length=1, max_length=128)
+
+
 class CreateChatRequest(BaseModel):
     participant_ids: list[str] = Field(default_factory=list)
     title: str | None = None
@@ -78,11 +84,13 @@ class CreateUploadRequest(BaseModel):
 OTP_SESSIONS: dict[str, dict[str, Any]] = {}
 VERIFICATION_TOKENS: dict[str, str] = {}
 USERS_BY_PHONE: dict[str, dict[str, Any]] = {}
+USERS_BY_LOGIN: dict[str, dict[str, Any]] = {}
 ACCESS_TOKENS: dict[str, str] = {}
 REFRESH_TOKENS: dict[str, str] = {}
 CHATS: dict[str, dict[str, Any]] = {}
 MESSAGES_BY_CHAT: dict[str, list[dict[str, Any]]] = {}
 ATTACHMENTS: dict[str, dict[str, Any]] = {}
+LOGIN_RE = re.compile(r"^[A-Za-z0-9]{3,}$")
 
 
 def now_iso() -> str:
@@ -178,6 +186,42 @@ def refresh(body: RefreshRequest) -> dict[str, Any]:
         "refresh_token": refresh_token,
         "token_type": "Bearer",
         "expires_in": 900,
+    }
+
+
+@app.post("/api/v1/auth/temp-register", status_code=201, tags=["Auth"])
+def temp_register(body: TempRegisterRequest) -> dict[str, Any]:
+    if not LOGIN_RE.fullmatch(body.login):
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "code": "bad_request",
+                "message": "Login must be at least 3 characters and contain only letters and digits",
+            },
+        )
+    if body.login in USERS_BY_LOGIN:
+        raise HTTPException(status_code=409, detail={"code": "conflict", "message": "User with this login already exists"})
+
+    user_id = str(uuid4())
+    created_at = now_iso()
+    USERS_BY_LOGIN[body.login] = {
+        "user_id": user_id,
+        "login": body.login,
+        "password": body.password,
+        "created_at": created_at,
+    }
+
+    access_token = str(uuid4())
+    refresh_token = str(uuid4())
+    ACCESS_TOKENS[access_token] = user_id
+    REFRESH_TOKENS[refresh_token] = user_id
+    return {
+        "user_id": user_id,
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "Bearer",
+        "expires_in": 900,
+        "created_at": created_at,
     }
 
 

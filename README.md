@@ -20,6 +20,15 @@ If the YAML file is missing or invalid, FastAPI falls back to auto-generated sch
 
 ## Quick smoke test (stubs)
 
+### Temporary flow (login/password)
+
+1. `POST /api/v1/auth/temp-register` with `login` and `password`.
+2. If login is unique, API creates user and returns `access_token` + `refresh_token`.
+3. If login already exists, API returns `409 conflict`.
+4. Login rules: at least 3 chars, only letters and digits.
+
+### OTP flow (legacy stub)
+
 1. `POST /api/v1/auth/request-otp` with phone.
 2. `POST /api/v1/auth/verify-otp` with returned `otp_session_id` and code `123456`.
 3. `POST /api/v1/auth/register` with `verification_token`.
